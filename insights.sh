@@ -1,4 +1,4 @@
-setup_appinsights(){
+setup_app_insights(){
   log "Setting up Application Insights..."
 
   if ! exists_ai $RESOURCE_GROUP $APP_INSIGHT_NAME; then
