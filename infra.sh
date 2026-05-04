@@ -9,12 +9,9 @@ REGION="swedencentral"
 RESOURCE_GROUP="RG-Emma-Spitz-a59389-DotNetCloudDeveloper-VT-Mars-Goteborg"
 
 # === INPUT ===
-# read -p "Project name: " PROJECT
-# read -p "Admin username: " ADMIN_USER
-# read -p "Admin password: " ADMIN_PASSWORD
-PROJECT="labb2"
-ADMIN_USER="adminUser"
-ADMIN_PASSWORD="MyStrongPassword1234"
+read -p "Project name: " PROJECT
+read -p "Admin username: " ADMIN_USER
+read -p "Admin password: " ADMIN_PASSWORD
 
 # === NAMING ===
 PREFIX="${ORG}-${PROJECT}-${ENV}"
@@ -31,7 +28,6 @@ APP_INSIGHT_NAME="${PREFIX}-ai"
 STORAGE_NAME="${ORG}${PROJECT}${ENV}sa"
 
 KV_NAME="${PREFIX}-kv"
-echo $KV_NAME
 
 KV_DefaultConnection_NAME="DefaultConnection"
 KV_APPLICATIONINSIGHTS_CONNECTION_STRING_NAME="ApplicationInsightsConnection"
