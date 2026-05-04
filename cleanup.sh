@@ -1,7 +1,5 @@
 #!/bin/bash
-source ./config.sh
-
-az resource list -g $RESOURCE_GROUP -o table
+cleanup(){az resource list -g $RESOURCE_GROUP -o table
 
 az webapp delete -g $RESOURCE_GROUP -n $APP_NAME
 az appservice plan delete -g $RESOURCE_GROUP -n $APP_PLAN -y
@@ -21,3 +19,4 @@ PROJECT_ID=$(az devops project show --project $APP_NAME --query id -o tsv)
 az devops project delete --id $PROJECT_ID -y
 
 az devops project list --output table
+}
