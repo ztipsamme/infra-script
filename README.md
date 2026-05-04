@@ -70,29 +70,15 @@ Before running the scripts:
 
 ## 🛠️ Setup Instructions
 
-### 1. Bootstrap Environment
-
-Initial setup of environment variables and Azure DevOps configuration:
-
-```
-chmod +x bootstrap.sh./bootstrap.sh
-```
-
-What it does:
-
-- Configures Azure DevOps organization & project
-- Defines naming conventions
-- Prepares environment variables
-- Initializes project structure
-
 ---
 
-### 2. Deploy Infrastructure
+### 1. Deploy Infrastructure
 
 Provision all Azure resources:
 
 ```
-chmod +x infra.sh./infra.sh
+chmod +x infra.sh
+./infra.sh
 ```
 
 What it does:
@@ -106,6 +92,24 @@ What it does:
 - Provisions Key Vault
 - Assigns Managed Identity permissions
 - Injects secrets into App Service
+
+---
+
+### 2. Bootstrap Environment
+
+Initial setup of environment variables and Azure DevOps configuration:
+
+```
+chmod +x bootstrap.sh
+./bootstrap.sh
+```
+
+What it does:
+
+- Configures Azure DevOps organization & project
+- Defines naming conventions
+- Prepares environment variables
+- Initializes project structure
 
 ## 🔐 Security Features
 
@@ -167,10 +171,8 @@ requests| order by timestamp desc
 To avoid unnecessary costs:
 
 ```
-az group delete -n <RESOURCE_GROUP> -y
+./cleanup.sh
 ```
-
-Or use cleanup section in infra.sh.
 
 ## 📌 Notes
 
