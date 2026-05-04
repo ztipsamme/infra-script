@@ -1,108 +1,133 @@
 # Azure Cloud Solution – Infra & Bootstrap Scripts
 
-This repository contains scripts for automatically setting up and managing a complete Azure cloud solution for a Web API application.
+![Azure](https://img.shields.io/badge/Azure-Cloud-blue?logo=microsoftazure)
+![.NET](https://img.shields.io/badge/.NET-API-purple?logo=dotnet)
+![Bash](https://img.shields.io/badge/Shell-Bash-black?logo=gnubash)
+![Status](https://img.shields.io/badge/Status-Active-success)
 
-The setup includes infrastructure provisioning, deployment configuration, and integration with Azure DevOps, Key Vault, Application Insights, and SQL Database.
+Automated Azure infrastructure setup for a full-stack Web API solution using **Azure App Service, SQL Database, Key Vault, Application Insights, Storage, and Azure DevOps CI/CD**.
 
-## Overview
+This project is split into two scripts:
 
-The solution is split into two main scripts:
+- `bootstrap.sh` → environment + DevOps setup
+- `infra.sh` → full Azure infrastructure provisioning
 
-### `bootstrap.sh`
+## 📦 Project Structure
 
-Initial setup script that prepares your environment.
+```
+.
+├── bootstrap.sh # Environment + Azure DevOps setup
+├── infra.sh # Azure infrastructure provisioning
+├── README.md
+└── app/ # (optional) .NET Web API project
+```
 
-Responsibilities:
+## 🚀 What This Setup Creates
 
-- Azure CLI authentication
-- Azure DevOps configuration
-- Creating or configuring project structure
-- Defining shared environment variables
-- Preparing naming conventions and resource prefixes
-
-### `infra.sh`
-
-Main infrastructure provisioning script that creates all Azure resources.
-
-Responsibilities:
-
-- Resource Group setup
-- App Service Plan & Web App
-- SQL Server & Database
-- Application Insights
-- Storage Account
-- Azure Key Vault
-- Firewall rules & security configuration
-- Managed Identity setup
-- App settings configuration
-- (Optional) deployment preparation
-
-## Architecture Components
-
-The scripts provision the following Azure services:
+The scripts automatically provision:
 
 - Azure App Service (Web API hosting)
 - App Service Plan
-- Azure SQL Server + Database (Entity Framework support)
-- Application Insights (logging & monitoring)
-- Azure Storage Account (static files / blobs)
+- Azure SQL Server + Database (Entity Framework ready)
+- Application Insights (monitoring & logging)
+- Azure Storage Account (blob/static files)
 - Azure Key Vault (secure secrets storage)
-- Azure DevOps integration (CI/CD pipeline support)
+- Managed Identity integration
+- Firewall rules & HTTPS enforcement
+- Azure DevOps CI/CD pipeline support
 
-## Prerequisites
+## 🧭 Architecture Overview
 
-Before running the scripts, make sure you have:
-
-- Azure CLI installed (az)
-- Logged into Azure (az login)
-- Azure DevOps extension installed:
-
-  ```bash
-  az extension add -n azure-devops
-  ```
-
-- Appropriate Azure subscription permissions
-- Bash-compatible shell (Linux / macOS / WSL)
-
-## Setup Flow
-
-### 1. Run Bootstrap Script
-
-This prepares your environment and global configuration:
-
-```bash
-chmod +x bootstrap.sh
-./bootstrap.sh
+```
+Client
+↓
+Azure App Service (Web API)
+↓
+SQL Database (Azure SQL)
+↓
+Key Vault (Secrets)
+↓
+Application Insights (Monitoring)
+↓
+Storage Account (Blobs)
 ```
 
-Typical actions:
+## ⚙️ Prerequisites
 
-- Sets organization, project, environment variables
-- Configures Azure DevOps defaults
-- Defines naming conventions for resources
+Before running the scripts:
+
+- Azure CLI installed
+- Logged in:
+  ```bash
+  az login
+  ```
+- Azure DevOps extension:
+  ```
+  az extension add -n azure-devops
+  ```
+- Proper Azure subscription permissions
+- Bash shell (macOS / Linux / WSL)
+
+## 🛠️ Setup Instructions
+
+### 1. Bootstrap Environment
+
+Initial setup of environment variables and Azure DevOps configuration:
+
+```
+chmod +x bootstrap.sh./bootstrap.sh
+```
+
+What it does:
+
+- Configures Azure DevOps organization & project
+- Defines naming conventions
+- Prepares environment variables
+- Initializes project structure
+
+---
 
 ### 2. Deploy Infrastructure
 
-After bootstrap is complete:
+Provision all Azure resources:
 
-```bash
-chmod +x infra.sh
-./infra.sh
+```
+chmod +x infra.sh./infra.sh
 ```
 
-This will:
+What it does:
 
-- Create all Azure resources
-- Configure SQL Server + firewall rules
-- Generate connection strings
-- Store secrets in Key Vault
-- Configure App Service settings
-- Enable Application Insights
-- Set up Managed Identity permissions
+- Creates Resource Group
+- Deploys App Service + Plan
+- Creates SQL Server + Database
+- Configures firewall rules
+- Sets up Application Insights
+- Creates Storage Account
+- Provisions Key Vault
+- Assigns Managed Identity permissions
+- Injects secrets into App Service
 
-## Key Variables
+## 🔐 Security Features
 
-These are commonly defined in bootstrap.sh:
+- HTTPS enforced on App Service
+- SQL firewall IP restrictions
+- Secrets stored in Azure Key Vault
+- Managed Identity authentication (no passwords in code)
+- Environment-based configuration
+
+## 🔄 CI/CD Pipeline (Azure DevOps)
+
+Supports automated deployment
+
+Pipeline stages:
+
+- Build (.NET Web API)
+- Publish artifacts
+- Deploy to Azure App Service
+
+## 🧪 Example Variables
+
+Defined in bootstrap.sh:
 
 ```bash
 ORG="your-org"
@@ -122,25 +147,42 @@ KV_NAME="${PREFIX}-kv"
 STORAGE_NAME="${ORG}${PROJECT}${ENV}sa"
 ```
 
-## Security Setup
+## 📊 Monitoring
 
-The infrastructure includes:
+Application Insights provides:
 
-- HTTPS enforcement on App Service
-- IP firewall restrictions for SQL Server
-- Azure Key Vault for secrets management
-- Managed Identity authentication between App Service and Key Vault
+- Request tracking
+- Performance metrics
+- Live logs
+- Failure diagnostics
 
-## Deployment (CI/CD)
+Query example:
 
-The project supports Azure DevOps pipelines:
+```kusto
+requests| order by timestamp desc
+```
 
-- Build stage compiles and publishes the .NET API
-- Deploy stage deploys to Azure App Service
-- Uses Service Connection for authentication
+## 🧹 Cleanup
 
-## Notes
+To avoid unnecessary costs:
 
-- All infrastructure is fully scripted using Azure CLI
-- No manual setup is required after bootstrap
-- Designed for repeatable deployments across environments (dev/test/prod)
+```
+az group delete -n <RESOURCE_GROUP> -y
+```
+
+Or use cleanup section in infra.sh.
+
+## 📌 Notes
+
+- Fully automated infrastructure (Infrastructure as Code via Azure CLI)
+- Designed for reuse across multiple environments (dev/test/prod)
+- No manual Azure portal configuration required
+- Optimized for student lab + production-like setup
+
+## 📜 License
+
+For educational use.
+
+## 👨‍💻 Author
+
+Built as part of an Azure cloud deployment lab project.
