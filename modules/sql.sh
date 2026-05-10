@@ -1,8 +1,8 @@
 setup_sql() {
   log "Setting up SQL..."
 
-  # CREATE 
   if ! exists_sql $RESOURCE_GROUP $SQL_SERVER_NAME; then
+      # Create SQL Server
       az sql server create \
         -l $REGION \
         -g $RESOURCE_GROUP \
@@ -12,6 +12,7 @@ setup_sql() {
   fi
 
   if ! az sql db show -g $RESOURCE_GROUP -s $SQL_SERVER_NAME -n $SQL_DB_NAME &>/dev/null; then
+    # Create SQL Database
     az sql db create \
       -g $RESOURCE_GROUP \
       -s $SQL_SERVER_NAME \
@@ -23,8 +24,7 @@ setup_sql() {
   DB_CONN_STRING=${DB_CONN_STRING//<username>/$ADMIN_USER}
   DB_CONN_STRING=${DB_CONN_STRING//<password>/$ADMIN_PASSWORD}
 
-  export DB_CONN_STRING
-
+  # Add Database ConnectionString to Key Vault
   az keyvault secret set \
     --vault-name $KV_NAME \
     --name $KV_DefaultConnection_NAME \
@@ -33,9 +33,9 @@ setup_sql() {
   az webapp config appsettings set \
     --name $APP_NAME \
     --resource-group $RESOURCE_GROUP \
-    --settings \
-    "ConnectionStrings__DefaultConnection=@Microsoft.KeyVault(SecretUri=https://$KV_NAME.vault.azure.net/secrets/$KV_DefaultConnection_NAME/)"
+    --settings ConnectionStrings__DefaultConnection="@Microsoft.KeyVault(SecretUri=https://$KV_NAME.vault.azure.net/secrets/$KV_DefaultConnection_NAME/)"
 
+  # Set Firewall rule to allow current IP-adress
   MY_IP=$(curl ipinfo.io/ip)
   az sql server firewall-rule create \
     -g $RESOURCE_GROUP \
@@ -44,4 +44,12 @@ setup_sql() {
     --start-ip-address $MY_IP \
     --end-ip-address $MY_IP \
     2>/dev/null || true
+
+  # Set Firewall rule to allow Azure Resources
+  az sql server firewall-rule create \
+  --resource-group $RESOURCE_GROUP \
+  --server $SQL_SERVER_NAME \
+  --name AllowAzureServices \
+  --start-ip-address 0.0.0.0 \
+  --end-ip-address 0.0.0.0
 }

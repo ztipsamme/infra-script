@@ -1,0 +1,66 @@
+variables:
+  AZURE_SUBSCRIPTION: $AZURE_SUBSCRIPTION
+  APP_NAME: $APP_NAME
+
+trigger:
+  branches:
+    include:
+      - main
+
+pool:
+  vmImage: 'windows-latest'
+
+stages:
+  - stage: Build
+    jobs:
+      - job: Build
+        displayName: 'Build Job'
+
+        steps:
+          - task: UseDotNet@2
+            inputs:
+              packageType: 'sdk'
+              version: '10.x'
+              installationPath: $(Agent.ToolsDirectory)/dotnet
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Build Solution'
+            inputs:
+              command: 'build'
+              projects: '**/*.csproj'
+              arguments: '-c Release'
+
+          - task: DotNetCoreCLI@2
+            displayName: 'Publish Artifacts'
+            inputs:
+              command: 'publish'
+              publishWebProjects: false
+              projects: '**/*.csproj'
+              arguments: '-c Release -o $(Build.ArtifactStagingDirectory)'
+              zipAfterPublish: true
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publish Build Artifacts'
+            inputs:
+              PathtoPublish: $(Build.ArtifactStagingDirectory)
+              ArtifactName: drop
+              publishLocation: Container
+
+  - stage: Deploy
+    jobs:
+      - deployment: DeployWebApp
+        displayName: 'Deploy to azure app service'
+        environment: 'production'
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - download: current
+                  artifact: drop
+
+                - task: AzureWebApp@1
+                  inputs:
+                    azureSubscription: $(AZURE_SUBSCRIPTION)
+                    appType: webApp
+                    appName: $(APP_NAME)
+                    package: $(Pipeline.Workspace)/drop/**/*.zip
