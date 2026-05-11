@@ -1,15 +1,12 @@
 #!/bin/bash
 set -e
 
-echo "💣 DestroyingAzure infrastructure: $ENV"
-
-az resource list \
-  -g $RESOURCE_GROUP \
-  -o table
+echo "💣 Destroying: $PROJECT $ENV"
 
 az webapp delete \
   -g $RESOURCE_GROUP \
   -n $APP_NAME
+
 az appservice plan delete \
   -g $RESOURCE_GROUP \
   -n $APP_PLAN \
@@ -25,8 +22,7 @@ az sql server delete \
   -n $SQL_SERVER_NAME \
   -y
 
-az monitor app\
-  -insights component delete \
+az monitor app-insights component delete \
   -g $RESOURCE_GROUP \
   -a $APP_INSIGHT_NAME
 
