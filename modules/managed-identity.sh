@@ -27,13 +27,23 @@ setup_managed_identity(){
     fi
 
     echo "Waiting... ($i/10)"
-    sleep 10
+    sleep 20
   done
 
-  # Give App Service access to Key Vault
-  az role assignment create \
-    --assignee $PRINCIPAL_ID \
-    --role "Key Vault Secrets User" \
-    --scope $(az keyvault show -n $KV_NAME -g $RESOURCE_GROUP --query id -o tsv) \
-    2>/dev/null || true
+  for i in {1..5}; do
+    echo "🔑 Assigning Key Vault role (attempt $i)..."
+
+    if az role assignment create \
+      --assignee "$PRINCIPAL_ID" \
+      --role "Key Vault Secrets User" \
+      --scope "$(az keyvault show -n "$KEYVAULT_NAME" -g "$RESOURCE_GROUP" --query id -o tsv)" \
+      >/dev/null 2>&1; then
+
+      echo "✅ Role assigned"
+      break
+    else
+      echo "⏳ retrying..."
+      sleep 10
+    fi
+  done
 }

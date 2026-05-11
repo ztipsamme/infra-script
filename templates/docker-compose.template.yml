@@ -1,0 +1,10 @@
+services:
+  sql:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    platform: linux/amd64
+    container_name: $LOCAL_DOCKER_CONTAINER_NAME
+    environment:
+      SA_PASSWORD: $LOCAL_DB_PASSWORD
+      ACCEPT_EULA: 'Y'
+    ports:
+      - '1433:1433'

@@ -1,10 +1,10 @@
 setup_keyvault(){
   log "Setting up Key Vault..."
 
-  if ! exists_kv $RESOURCE_GROUP $KV_NAME; then
+  if ! exists_kv $RESOURCE_GROUP $KEYVAULT_NAME; then
     # Create Key Vault
     az keyvault create \
-      -n $KV_NAME \
+      -n $KEYVAULT_NAME \
       -g $RESOURCE_GROUP \
       -l $REGION
   fi
@@ -15,6 +15,6 @@ setup_keyvault(){
   az role assignment create \
     --assignee $USER_ID \
     --role "Key Vault Administrator" \
-    --scope $(az keyvault show -n $KV_NAME -g $RESOURCE_GROUP --query id -o tsv) \
+    --scope $(az keyvault show -n $KEYVAULT_NAME -g $RESOURCE_GROUP --query id -o tsv) \
     2>/dev/null || true
 }

@@ -2,7 +2,10 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddApplicationInsightsTelemetry();
+if (!builder.Environment.IsDevelopment())
+{
+    builder.Services.AddApplicationInsightsTelemetry();
+}
 
 var connString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -41,19 +44,22 @@ using (var scope = app.Services.CreateScope())
 
     logger.LogInformation("DB Connection exists: {hasConn}", !string.IsNullOrEmpty(connString));
 
-    try
+    if (app.Environment.IsDevelopment())
     {
-        logger.LogInformation("➡️ Starting DB migration...");
-        db.Database.Migrate();
-        logger.LogInformation("DB migration completed");
+        try
+        {
+            logger.LogInformation("➡️ Starting DB migration...");
+            db.Database.Migrate();
+            logger.LogInformation("DB migration completed");
 
-        logger.LogInformation("🌱 Seeding database...");
-        DbSeeder.Seed(db);
-        logger.LogInformation("Seeding completed");
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "❌ DB init failed");
+            logger.LogInformation("🌱 Seeding database...");
+            DbSeeder.Seed(db);
+            logger.LogInformation("Seeding completed");
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "❌ DB init failed");
+        }
     }
 }
 

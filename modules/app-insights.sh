@@ -33,12 +33,12 @@ setup_app_insights(){
 
   # Add Application Insights Connection String to Key Vault
   az keyvault secret set \
-    --vault-name $KV_NAME \
-    --name $KV_APPLICATIONINSIGHTS_CONNECTION_STRING_NAME \
+    --vault-name $KEYVAULT_NAME \
+    --name $KEYVAULT_APPLICATIONINSIGHTS_CONNECTION_STRING_NAME \
     --value $INSIGHTS_CONN_STRING
 
   az webapp config appsettings set \
     --name $APP_NAME \
     --resource-group $RESOURCE_GROUP \
-    --settings APPLICATIONINSIGHTS_CONNECTION_STRING="@Microsoft.KeyVault(SecretUri=https://$KV_NAME.vault.azure.net/secrets/$KV_APPLICATIONINSIGHTS_CONNECTION_STRING_NAME/)"
+    --settings APPLICATIONINSIGHTS_CONNECTION_STRING="@Microsoft.KeyVault(SecretUri=https://$KEYVAULT_NAME.vault.azure.net/secrets/$KEYVAULT_APPLICATIONINSIGHTS_CONNECTION_STRING_NAME/)"
 }

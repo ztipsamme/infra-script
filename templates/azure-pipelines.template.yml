@@ -1,6 +1,7 @@
 variables:
   AZURE_SUBSCRIPTION: $AZURE_SUBSCRIPTION
   APP_NAME: $APP_NAME
+  KEYVAULT_NAME: $KEYVAULT_NAME
 
 trigger:
   branches:
@@ -46,7 +47,40 @@ stages:
               ArtifactName: drop
               publishLocation: Container
 
+  - stage: Apply_Migrations
+    dependsOn: Build
+    jobs:
+      - job: MigrateDatabase
+        steps:
+          - checkout: self
+
+          - task: AzureKeyVault@2
+            inputs:
+              azureSubscription: $(AZURE_SUBSCRIPTION)
+              KeyVaultName: $(KEYVAULT_NAME)
+              SecretsFilter: 'DefaultConnection'
+              RunAsPreJob: false
+
+          - task: UseDotNet@2
+            inputs:
+              packageType: sdk
+              version: '10.x'
+
+          - task: DotNetCoreCLI@2
+            inputs:
+              command: 'restore'
+              projects: '**/*.csproj'
+
+          - script: dotnet tool install --global dotnet-ef
+            displayName: 'Install EF Tool'
+
+          - script: dotnet ef database update --project . --startup-project .
+            displayName: 'Apply EF Migrations'
+            env:
+              ConnectionStrings__DefaultConnection: $(DefaultConnection)
+
   - stage: Deploy
+    dependsOn: Apply_Migrations
     jobs:
       - deployment: DeployWebApp
         displayName: 'Deploy to azure app service'

@@ -26,14 +26,14 @@ setup_sql() {
 
   # Add Database ConnectionString to Key Vault
   az keyvault secret set \
-    --vault-name $KV_NAME \
-    --name $KV_DefaultConnection_NAME \
+    --vault-name $KEYVAULT_NAME \
+    --name $KEYVAULT_DefaultConnection_NAME \
     --value "$DB_CONN_STRING"
 
   az webapp config appsettings set \
     --name $APP_NAME \
     --resource-group $RESOURCE_GROUP \
-    --settings ConnectionStrings__DefaultConnection="@Microsoft.KeyVault(SecretUri=https://$KV_NAME.vault.azure.net/secrets/$KV_DefaultConnection_NAME/)"
+    --settings ConnectionStrings__DefaultConnection="@Microsoft.KeyVault(SecretUri=https://$KEYVAULT_NAME.vault.azure.net/secrets/$KEYVAULT_DefaultConnection_NAME/)"
 
   # Set Firewall rule to allow current IP-adress
   MY_IP=$(curl ipinfo.io/ip)

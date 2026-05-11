@@ -1,90 +1,74 @@
 #!/bin/bash
-create_dotnet_project(){
-  echo "Creating .NET project..."
-  dotnet new webapi -n $PROJECT
-  cd $PROJECT
+set -e
 
+create_dotnet_project(){
+  echo "🧱 Creating .NET project..."
+
+  dotnet new webapi -n "$PROJECT"
+  cd "$PROJECT"
   envsubst < "$SCRIPT_DIR/templates/program.template.cs" > Program.cs
 
-  export AZURE_SUBSCRIPTION="$PROJECT-connection"
-
-  envsubst '$APP_NAME $AZURE_SUBSCRIPTION' \
-    < "$SCRIPT_DIR/templates/azure-pipelines.template.yml" \
-    > azure-pipelines.yml
 
   echo "📦 Adding packages..."
   dotnet add package Microsoft.ApplicationInsights.AspNetCore
+
   dotnet add package Microsoft.EntityFrameworkCore
   dotnet add package Microsoft.EntityFrameworkCore.Tools
   dotnet add package Microsoft.EntityFrameworkCore.SqlServer
   dotnet add package Microsoft.EntityFrameworkCore.Design
   dotnet new gitignore
 
-  echo "⭐️ Setup User Secrets and .env file in local repo"
-  DB_CONN_STRING=$(az sql db show-connection-string -s $SQL_SERVER_NAME -n $SQL_DB_NAME -c ado.net --output tsv)
-  DB_CONN_STRING=${DB_CONN_STRING//<username>/$ADMIN_USER}
-  DB_CONN_STRING=${DB_CONN_STRING//<password>/$ADMIN_PASSWORD}
+  echo "📁 Project structure ready"
+}
 
-  INSIGHTS_CONN_STRING=$(az monitor app-insights component show --app $APP_INSIGHT_NAME -g $RESOURCE_GROUP --query connectionString -o tsv)
+setup_local_dev(){
+  echo "🐳 Setting up local dev environment..."
+
+  export LOCAL_DOCKER_CONTAINER_NAME="${PROJECT}"
+  export LOCAL_DB_PASSWORD="Your_password123!"
+
+  DB_CONN_STRING="Server=localhost,1433;Database=$PROJECT;User Id=sa;Password=$LOCAL_DB_PASSWORD;TrustServerCertificate=True"
+
+  echo "🔐 Setting up user-secrets..."
+  dotnet user-secrets init
+  dotnet user-secrets set "ConnectionStrings:DefaultConnection" "$DB_CONN_STRING"
+
+  echo "📦 Creating local docker setup..."
+  cp "$SCRIPT_DIR/templates/docker-compose.template.yml" docker-compose.yml
+  envsubst < "$SCRIPT_DIR/templates/start-dev.template.sh" > start-dev.sh
+
+  echo "📄 Creating .env files..."
+  cat > .env <<EOF
+DB_CONN_STRING=${DB_CONN_STRING}
+LOCAL_DOCKER_CONTAINER_NAME=${LOCAL_DOCKER_CONTAINER_NAME}
+LOCAL_DB_PASSWORD=${LOCAL_DB_PASSWORD}
+EOF
 
   envsubst < "$SCRIPT_DIR/templates/.env.example.template" > .env.example
 
-cat > .env <<EOF
-DB_CONN_STRING="${DB_CONN_STRING}"
-INSIGHTS_CONN_STRING="${INSIGHTS_CONN_STRING}"
-EOF
+  echo "📄 Creating pipeline files... "
 
-  dotnet user-secrets init
-  dotnet user-secrets set "ConnectionStrings:DefaultConnection" "$DB_CONN_STRING"
-  dotnet user-secrets set "APPLICATIONINSIGHTS_CONNECTION_STRING" "$INSIGHTS_CONN_STRING"
+  export AZURE_SUBSCRIPTION="$PROJECT-connection"
+  export KEYVAULT_NAME="$KEYVAULT_NAME"
 
-  echo "⭐️ Create first migration"
-  dotnet ef migrations add InitialCreate
-  dotnet ef database update
-}
-
-setup_devops(){
-  echo "⚙️ Setting up Azure DevOps..."
-  az devops configure --defaults organization=https://dev.azure.com/$ORG/ 
-  az devops project create --name $PROJECT --visibility private
-
-  echo "⏳ Waiting for project..."
-  until az devops project show --project $PROJECT &>/dev/null; do
-    sleep 5
-  done
-
-  az devops configure --defaults project=$PROJECT
-
-  if ! az repos show --repository $PROJECT --project $PROJECT &>/dev/null; then
-    echo "📁 Creating repo..."
-    az repos create --name $PROJECT --project $PROJECT
-  else
-    echo "📁 Repo already exists, skipping..."
-  fi
-}
-
-push_to_repo(){
-  SSH_URL=$(az repos show --repository $PROJECT --project $PROJECT --query "sshUrl" -o tsv)
-
-  echo "🐙 Initializing git..."
-  git init
-  git branch -M main
-  git remote add origin $SSH_URL
-  git add .
-  git commit -m "Initial commit"
-  git push -u origin main
-}
-
-create_pipeline(){
-  echo "🚀 Creating pipeline..."
-  az pipelines create --name $ENV --project $PROJECT --repository $PROJECT --repository-type tfsgit --branch main --yml-path azure-pipelines.yml
+  envsubst '$APP_NAME $AZURE_SUBSCRIPTION $KEYVAULT_NAME' \
+    < "$SCRIPT_DIR/templates/azure-pipelines.template.yml" \
+    > azure-pipelines.yml
+  echo "✅ Local dev setup complete"
 }
 
 setup_project(){
   create_dotnet_project
-  setup_devops
-  push_to_repo
-  create_pipeline
-  
+  setup_local_dev
   code .
 }
+
+
+echo "🚀 Starting app bootstrap..."
+
+setup_project
+
+echo "✅ App created successfully"
+
+#!/bin/bash
+set -e
