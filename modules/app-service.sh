@@ -21,4 +21,24 @@ setup_app_service(){
   az webapp update \
     -g $RESOURCE_GROUP \
     -n $APP_NAME --https-only true
+
+  EXISTS=$(az webapp config access-restriction show \
+    -g $RESOURCE_GROUP \
+    -n $APP_NAME \
+    --query "ipSecurityRestrictions[?name=='AllowHomeIP'] | length(@)" \
+    -o tsv)
+
+  if [ "$EXISTS" -eq 0 ]; then
+    echo "Rule does not exist. Creating..."
+
+    az webapp config access-restriction add \
+      -g $RESOURCE_GROUP \
+      -n $APP_NAME \
+      --rule-name AllowHomeIP \
+      --action Allow \
+      --ip-address $MY_IP \
+      --priority 100
+  else
+    echo "Rule already exists. Skipping..."
+  fi
 }

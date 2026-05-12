@@ -26,4 +26,6 @@ KEYVAULT_NAME="${PREFIX}-kv"
 KEYVAULT_DefaultConnection_NAME="DefaultConnection"
 KEYVAULT_APPLICATIONINSIGHTS_CONNECTION_STRING_NAME="ApplicationInsightsConnection"
 
+MY_IP=$(curl ipinfo.io/ip)
+
 echo "✅ Created variables"

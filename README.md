@@ -123,7 +123,7 @@ Initializes Azure DevOps configuration and project setup.
 
 ```bash
 $ chmod +x cloud-cli
-$ ./cloud-cli/index.sh bootstrap --name <my-project>
+$ ~/cloud-cli/index.sh bootstrap --name <my-project> --env prod
 ```
 
 Start local development environment
@@ -162,7 +162,7 @@ Deploy all Azure resources:
 ```bash
 $ cd <your-project>
 
-$ ./cloud-cli/index.sh deploy --name <my-project> --env prod
+$ ~/cloud-cli/index.sh deploy --name <my-project> --env prod
 ```
 
 Add service connection:
@@ -179,7 +179,7 @@ Go to: `https://dev.azure.com/<my-organization>/<my-project>/\_settings/` -> Pip
 Run the script again to complete the setup:
 
 ```bash
-$ ./cloud-cli/index.sh deploy --name <my-project> --env prod
+$ ~/cloud-cli/index.sh deploy --name <my-project> --env prod
 ```
 
 Creates:
@@ -199,7 +199,7 @@ Creates:
 Remove Azure resources to avoid unnecessary costs and removes Azure DevOps project
 
 ```bash
-./cloud-cli/index.sh destroy --name <my-project> --env prod
+$ ~/cloud-cli/index.sh destroy --name <my-project> --env prod
 ```
 
 ## 🔐 Security

@@ -11,9 +11,7 @@ setup_storage(){
   fi
 
   STORAGE_KEY=$(az storage account keys list --account-name $STORAGE_NAME --query "[0].value" -o tsv)
-
-  read -p "Storage container name [images]: " STORAGE_CONTAINER_NAME
-  STORAGE_CONTAINER_NAME=${STORAGE_CONTAINER_NAME:-images}
+  STORAGE_CONTAINER_NAME=images
 
   az storage container create \
     --account-name $STORAGE_NAME \
@@ -21,4 +19,12 @@ setup_storage(){
     --account-key $STORAGE_KEY \
     --public-access off \
     2>/dev/null || true
+
+  az storage blob upload \
+    --account-name $STORAGE_NAME \
+    --container-name $STORAGE_CONTAINER_NAME \
+    -n profile-image.jpeg \
+    --file "$SCRIPT_DIR/assets/profile-image.jpeg" \
+    --account-key $STORAGE_KEY \
+    --overwrite # temporary
 }

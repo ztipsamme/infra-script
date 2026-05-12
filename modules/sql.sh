@@ -36,7 +36,6 @@ setup_sql() {
     --settings ConnectionStrings__DefaultConnection="@Microsoft.KeyVault(SecretUri=https://$KEYVAULT_NAME.vault.azure.net/secrets/$KEYVAULT_DefaultConnection_NAME/)"
 
   # Set Firewall rule to allow current IP-adress
-  MY_IP=$(curl ipinfo.io/ip)
   az sql server firewall-rule create \
     -g $RESOURCE_GROUP \
     -s $SQL_SERVER_NAME \
