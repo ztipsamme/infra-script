@@ -12,6 +12,7 @@ source "$SCRIPT_DIR/modules/managed-identity.sh"
 source "$SCRIPT_DIR/modules/sql.sh"
 source "$SCRIPT_DIR/modules/app-insights.sh"
 source "$SCRIPT_DIR/modules/storage.sh"
+source "$SCRIPT_DIR/modules/backups.sh"
 source "$SCRIPT_DIR/modules/devops.sh"
 source "$SCRIPT_DIR/modules/devops.sh"
 source "$SCRIPT_DIR/modules/git.sh"
@@ -24,6 +25,7 @@ setup_managed_identity
 setup_sql
 setup_app_insights
 setup_storage
+setup_backups
 
 setup_devops
 push_to_repo

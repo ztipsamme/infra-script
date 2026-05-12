@@ -6,7 +6,7 @@ setup_app_service(){
     az appservice plan create \
       -n $APP_PLAN \
       -g $RESOURCE_GROUP \
-      --sku F1 \
+      --sku B1 \
       -l $REGION
   fi
 
