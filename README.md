@@ -1,39 +1,51 @@
-# Azure Cloud Solution – Infra & Bootstrap Scripts
+# Azure Cloud Solution Script – Automated Infrastructure & CI/CD
 
 ![Azure](https://img.shields.io/badge/Azure-Cloud-blue?logo=microsoftazure)
-![.NET](https://img.shields.io/badge/.NET-API-purple?logo=dotnet)
-![Bash](https://img.shields.io/badge/Shell-Bash-black?logo=gnubash)
+![.NET](https://img.shields.io/badge/.NET-8-purple?logo=dotnet)
+![Docker](https://img.shields.io/badge/Docker-Enabled-2496ED?logo=docker)
+![Azure DevOps](https://img.shields.io/badge/Azure_DevOps-CI%2FCD-0078D7?logo=azuredevops)
 ![Status](https://img.shields.io/badge/Status-Active-success)
 
-Automated Azure infrastructure setup for a full-stack Web API solution using **Azure App Service, SQL Database, Key Vault, Application Insights, Storage, and Azure DevOps CI/CD**.
+Automated Azure infrastructure and deployment setup for a .NET Web API using:
 
-This project is split into two scripts:
+- Azure App Service
+- Azure SQL Database
+- Azure Key Vault
+- Application Insights
+- Azure Storage Account
+- Azure DevOps CI/CD
+- Docker (local development)
 
-- `bootstrap.sh` → environment + DevOps setup
-- `infra.sh` → full Azure infrastructure provisioning
+The project is designed as a reusable cloud deployment template using Azure CLI and Bash scripting.
+
+---
 
 ## 📦 Project Structure
 
-```
+```txt
 .
-├── bootstrap.sh # Environment + Azure DevOps setup
-├── infra.sh # Azure infrastructure provisioning
-├── README.md
-└── app/ # (optional) .NET Web API project
+├── modules
+├── templates
+├── bootstrap.sh
+├── config.sh
+├── deploy.sh
+├── destroy.sh
+└── README.md
 ```
 
 ## 🚀 What This Setup Creates
 
-The scripts automatically provision:
+The scripts automatically provisions:
 
+- Azure Resource Group
 - Azure App Service (Web API hosting)
 - App Service Plan
-- Azure SQL Server + Database (Entity Framework ready)
-- Application Insights (monitoring & logging)
-- Azure Storage Account (blob/static files)
-- Azure Key Vault (secure secrets storage)
-- Managed Identity integration
-- Firewall rules & HTTPS enforcement
+- Azure SQL Server
+- Azure SQL Database
+- Application Insights
+- Azure Storage Account
+- Azure Key Vault
+- Managed Identity
 - Azure DevOps CI/CD pipeline support
 
 ## 🧭 Architecture Overview
@@ -43,143 +55,239 @@ Client
 ↓
 Azure App Service (Web API)
 ↓
-SQL Database (Azure SQL)
+Azure SQL Database (Azure SQL)
 ↓
-Key Vault (Secrets)
+Azure Key Vault (Secrets)
 ↓
 Application Insights (Monitoring)
 ↓
-Storage Account (Blobs)
+Azure Storage Account (Blobs)
 ```
+
+## 🚀 Features
+
+### Infrastructure as Code
+
+All Azure resources are created through Azure CLI scripts.
+
+#### CI/CD
+
+Deployment is automated through Azure DevOps pipelines.
+
+#### Secure Configuration
+
+Secrets stored in Azure Key Vault
+Managed Identity authentication
+No secrets committed to source control
+HTTPS enforced
+
+#### Local Development Environment
+
+Docker-based SQL Server environment for local development.
+
+### Environment Separation
+
+Supports multiple environments:
+
+- dev
+- prod
 
 ## ⚙️ Prerequisites
 
-Before running the scripts:
+Install:
 
-- Azure CLI installed
-- Logged in:
+- Azure CLI
+- Azure DevOps extension
+- Docker Desktop
+- .NET 10 SDK
+- Bash shell
+
+## 🔐 Login & Azure DevOps Setup
+
+- Login to Azure:
+
   ```bash
-  az login
+  $ az login
   ```
-- Azure DevOps extension:
+
+- Install Azure DevOps extension::
   ```
-  az extension add -n azure-devops
+  $ az extension add -n azure-devops
   ```
-- Proper Azure subscription permissions
-- Bash shell (macOS / Linux / WSL)
 
-## 🛠️ Setup Instructions
+## 🛠️ Usage
 
----
+### Bootstrap Project
 
-### 1. Deploy Infrastructure
-
-Provision all Azure resources:
-
-```
-chmod +x infra.sh
-./infra.sh
-```
-
-What it does:
-
-- Creates Resource Group
-- Deploys App Service + Plan
-- Creates SQL Server + Database
-- Configures firewall rules
-- Sets up Application Insights
-- Creates Storage Account
-- Provisions Key Vault
-- Assigns Managed Identity permissions
-- Injects secrets into App Service
-
----
-
-### 2. Bootstrap Environment
-
-Initial setup of environment variables and Azure DevOps configuration:
-
-```
-chmod +x bootstrap.sh
-./bootstrap.sh
-```
-
-What it does:
-
-- Configures Azure DevOps organization & project
-- Defines naming conventions
-- Prepares environment variables
-- Initializes project structure
-
-## 🔐 Security Features
-
-- HTTPS enforced on App Service
-- SQL firewall IP restrictions
-- Secrets stored in Azure Key Vault
-- Managed Identity authentication (no passwords in code)
-- Environment-based configuration
-
-## 🔄 CI/CD Pipeline (Azure DevOps)
-
-Supports automated deployment
-
-Pipeline stages:
-
-- Build (.NET Web API)
-- Publish artifacts
-- Deploy to Azure App Service
-
-## 🧪 Example Variables
-
-Defined in bootstrap.sh:
+Initializes Azure DevOps configuration and project setup.
 
 ```bash
-ORG="your-org"
-PROJECT="your-project"
-ENV="prod"
-REGION="swedencentral"
-
-PREFIX="${ORG}-${PROJECT}-${ENV}"
-
-APP_NAME="${PREFIX}-app"
-APP_PLAN="${PREFIX}-plan"
-
-SQL_SERVER_NAME="${ORG}${PROJECT}${ENV}sql"
-SQL_DB_NAME="${PROJECT}-${ENV}"
-
-KEYVAULT_NAME="${PREFIX}-kv"
-STORAGE_NAME="${ORG}${PROJECT}${ENV}sa"
+$ chmod +x cloud-cli
+$ ./cloud-cli/index.sh bootstrap --name <my-project>
 ```
+
+Start local development environment
+
+```bash
+$ cd <my-project>
+
+$ chmod +x start-dev.sh # Allow script usage
+$ ./start-dev.sh # Create docker container
+```
+
+Create and apply initial Entity Framework migrations
+
+```bash
+$ cd <my-project>
+
+$ dotnet ef migrations add InitialCreate # Add migration
+$ ./start-dev.sh # Run again to migrate
+```
+
+Creates:
+
+- New ASP.Net Project
+- Installs NuGet packages
+- Creates start-up script
+- Creates docker-compose.yml
+- Creates azure.pipelines.yml
+- Naming conventions
+- Initial variables
+- Initial User Secrets
+
+## Deploy Infrastructure
+
+Deploy all Azure resources:
+
+```bash
+$ cd <your-project>
+
+$ ./cloud-cli/index.sh deploy --name <my-project> --env prod
+```
+
+Add service connection:
+
+Go to: `https://dev.azure.com/<my-organization>/<my-project>/\_settings/` -> Pipelines -> Service connections -> Create service connection
+
+**Select:**
+
+- Service connection type: Azure Resource Manager
+- Subscription: <my-subscription>
+- Resource Group: <my-resouce-group>
+- Service Connection Name: `<my-project>-connection`
+
+Run the script again to complete the setup:
+
+```bash
+$ ./cloud-cli/index.sh deploy --name <my-project> --env prod
+```
+
+Creates:
+
+- Resource Group
+- App Service
+- SQL Database
+- Storage Account
+- Key Vault
+- Application Insights
+- Managed Identity permissions
+- Azure DevOps project configuration
+- Runs the pipeline
+
+## Destroy Infrastructure and Project
+
+Remove Azure resources to avoid unnecessary costs and removes Azure DevOps project
+
+```bash
+./cloud-cli/index.sh destroy --name <my-project> --env prod
+```
+
+## 🔐 Security
+
+Implemented security features:
+
+- HTTPS only
+- Managed Identity
+- Azure Key Vault secret references
+- SQL firewall rules
+  - App Service IP restrictions
+- Environment variable isolation
+- No hardcoded secrets
+
+Only approved IP addresses are allowed to access the Azure App Service.
+IP restrictions are configured through Azure CLI during deployment.
 
 ## 📊 Monitoring
 
 Application Insights provides:
 
 - Request tracking
-- Performance metrics
-- Live logs
-- Failure diagnostics
+- Exception logging
+- Performance monitoring
+- Live metrics
+- Distributed tracing
 
-Query example:
-
-```kusto
-requests| order by timestamp desc
-```
-
-## 🧹 Cleanup
-
-To avoid unnecessary costs:
+Example Kusto query:
 
 ```
-./cleanup.sh
+requests
+| order by timestamp desc
 ```
+
+## 🔄 Azure DevOps Pipeline
+
+Pipeline handles:
+
+1. Build
+2. Publish
+3. Deploy to Azure App Service
+
+Example stages:
+
+```txt
+Build → Test → Publish → Deploy
+```
+
+### ⚠️ Manual Pipeline Approval
+
+The Azure DevOps pipeline requires a one-time manual approval after setup. This is required at the following stages:
+
+- Apply_Migration
+- Deploy
+
+In Azure DevOps:
+
+```txt
+Pipelines → <my-pipeline> → <run> → <pending-stage>
+```
+
+## 📁 Storage Account Usage
+
+Azure Storage Account is used for:
+
+- Static assets
+- File uploads
+- Log storage
+- Backup-related resources
+
+## 📚 Technologies
+
+.NET 10
+ASP.NET Core Web API
+Entity Framework Core
+Azure CLI
+Azure App Service
+Azure SQL
+Azure Key Vault
+Azure DevOps
+Docker
+Bash
 
 ## 📌 Notes
 
-- Fully automated infrastructure (Infrastructure as Code via Azure CLI)
-- Designed for reuse across multiple environments (dev/test/prod)
-- No manual Azure portal configuration required
-- Optimized for student lab + production-like setup
+- Designed to be reusable across multiple projects
+- Minimal manual Azure portal configuration required
+- Optimized for both learning and production-like workflows
 
 ## 📜 License
 
