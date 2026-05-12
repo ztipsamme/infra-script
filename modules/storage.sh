@@ -6,7 +6,7 @@ setup_storage(){
       -n $STORAGE_NAME \
       -g $RESOURCE_GROUP \
       -l $REGION \
-      --allow-blob-public-access false \
+      --allow-blob-public-access true \
       --sku Standard_LRS
   fi
 
@@ -17,7 +17,7 @@ setup_storage(){
     --account-name $STORAGE_NAME \
     -n $STORAGE_CONTAINER_NAME \
     --account-key $STORAGE_KEY \
-    --public-access off \
+    --public-access blob \
     2>/dev/null || true
 
   az storage blob upload \
